@@ -1,7 +1,7 @@
-import pairings from "./pairing/pairing";
+import Pairing from "./pairing/pairing";
 
 
 
 export default {
-    pairings,
+    Pairing,
 }

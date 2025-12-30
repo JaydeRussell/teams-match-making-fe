@@ -1,10 +1,15 @@
 
+interface pairingProp {
+    players: string[]
+}
 
-export default function pairings() {
+function Pairing({ players }: pairingProp) {
     return (
-        <div>
-            Pairings:
-            
-        </div>
+        <>
+            Pairings: {players}
+        </>
     )
 }
+
+
+export default Pairing;
