@@ -1,0 +1,66 @@
+.pairing {
+    display: "flex";
+    flex-direction: "column";
+    padding-right: .25rem;
+}
+
+.player {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8;
+    margin-bottom: 1rem;
+}
+
+.avatar {
+    width: 48;
+    height: 48;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.blank-avatar {
+    width: 48;
+    height: 48;
+    border-radius: 50%;
+    background: #37ff00ff;
+}
+
+.opponent-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+}
+
+.opponent {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8;
+    background: white;
+    cursor: pointer;
+}
+
+.selected-matchup {
+    display: grid;
+    gap: 1rem;
+}
+
+.undo-button {
+    display: grid;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6;
+    border: 1px solid #e5e7eb;
+    background: white;
+    cursor: pointer;
+    color: #666;
+}
