@@ -1,6 +1,5 @@
 "use client";
 
-import Card from "./card";
 import './pairing.css';
 
 
@@ -59,11 +58,9 @@ export default function Pairing({ player, opponents, selectOpponent, undoPair, c
                                         <div>
                                             <div style={{ fontWeight: 600, color: "#666" }}>{opponent.faction}</div>
                                             <div style={{ fontWeight: 250, color: "#666" }}>{opponent.name}</div>
-                                            {player.matrix?.get(opponent.faction) !== undefined && (
-                                                <div style={{ color: "#666" }}>
-                                                    matrix: {player.matrix?.get(opponent.faction)}
-                                                </div>
-                                            )}
+                                            <div style={{ color: "#666" }}>
+                                                matchup: {player.matrix?.get(opponent.faction) ? player.matrix?.get(opponent.faction) : "unknown"}
+                                            </div>
                                         </div>
                                     </button>
                                 </li>
