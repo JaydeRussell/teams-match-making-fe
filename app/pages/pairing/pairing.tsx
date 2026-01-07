@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Card from "./card";
 import './pairing.css';
 
@@ -9,14 +8,17 @@ import './pairing.css';
 type PairingProps = {
     player: Player;
     opponents: Opponent[];
+    selectOpponent: selectOpponent;
+    undoPair: undoPair;
     className?: string;
 };
 
-export default function Pairing({ player, opponents, className }: PairingProps) {
-    const [selectedOpponentId, setSelectedOpponentId] = React.useState<string | number | null>(null);
-    const selectedOpponent = React.useMemo(() => opponents.find((o) => o.id === selectedOpponentId) ?? null, [selectedOpponentId, opponents]);
+type selectOpponent = (player: Player, opp: Opponent) => Player
+type undoPair = (player: Player) => Player
 
-    const showList = selectedOpponent === null;
+export default function Pairing({ player, opponents, selectOpponent, undoPair, className }: PairingProps) {
+    const showList = player.pair === undefined;
+    console.log(player)
 
     return (
         <div key={player.id} className={"pairing " + className}>
@@ -29,9 +31,8 @@ export default function Pairing({ player, opponents, className }: PairingProps) 
                 )}
                 <div>
                     <strong>{player.name}</strong>
-                    {typeof player.matchup === "number" && (
-                        <div style={{ color: "#666" }}>matchup: {player.matchup}</div>
-                    )}
+                    <div style={{ fontWeight: 600, color: "#666" }}>{player.faction}</div>
+                    <div></div>
                 </div>
             </section>
 
@@ -47,7 +48,7 @@ export default function Pairing({ player, opponents, className }: PairingProps) 
                                     <button
                                         type="button"
                                         className="opponent"
-                                        onClick={() => setSelectedOpponentId(opponent.id)}
+                                        onClick={() => selectOpponent(player, opponent)}
                                         aria-label={`Select opponent ${opponent.name}`}
                                     >
                                         {opponent.avatarUrl ? (
@@ -56,10 +57,11 @@ export default function Pairing({ player, opponents, className }: PairingProps) 
                                             <div aria-hidden className="blank-avatar" />
                                         )}
                                         <div>
-                                            <div style={{ fontWeight: 600, color: "#666" }}>{opponent.name}</div>
-                                            {typeof opponent.matchup === "number" && (
+                                            <div style={{ fontWeight: 600, color: "#666" }}>{opponent.faction}</div>
+                                            <div style={{ fontWeight: 250, color: "#666" }}>{opponent.name}</div>
+                                            {player.matrix?.get(opponent.faction) !== undefined && (
                                                 <div style={{ color: "#666" }}>
-                                                    matrix: {opponent.matchup}
+                                                    matrix: {player.matrix?.get(opponent.faction)}
                                                 </div>
                                             )}
                                         </div>
@@ -71,11 +73,18 @@ export default function Pairing({ player, opponents, className }: PairingProps) 
                 </section>
             ) : (
                 <section aria-label="Selected Matchup" >
-                    <div className="selected-matchup" >
-                        <Card title="Opponent" person={selectedOpponent!} />
-                        <button type="button" className="undo-button" onClick={() => setSelectedOpponentId(null)} >
-                            undo pairing
-                        </button>
+                    <div className="opponent" >
+                        <button type="button" className="undo-button" onClick={() => undoPair(player)} >X</button>
+                        <div>
+                            <div style={{ fontWeight: 600, color: "#666" }}>{player.pair!.faction}</div>
+                            <div style={{ fontWeight: 250, color: "#666" }}>{player.pair!.name}</div>
+                            {player.matrix?.get(player.pair!.faction) !== undefined && (
+                                <div style={{ color: "#666" }}>
+                                    matrix: {player.matrix?.get(player.pair!.faction)}
+                                </div>
+                            )}
+                        </div>
+
                     </div>
                 </section>
             )}
