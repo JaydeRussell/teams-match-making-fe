@@ -38,19 +38,20 @@ export default function Pairing({ player, opponents, selectOpponent, undoPair, c
             {/* Opponent list OR selected matchup */}
             {showList ? (
                 <section aria-label="Opponents">
-                    {opponents.length === 0 ? (
+                    {opponents?.length === 0 ? (
                         <p style={{ color: "#666" }}>No opponents available.</p>
                     ) : (
                         <ul role="list" className="opponent-list ">
-                            {opponents.map((opponent) => (
+                            {opponents?.map((opponent) => (
                                 <li key={opponent.id}>
                                     <button
                                         type="button"
                                         className="opponent"
                                         onClick={() => selectOpponent(player, opponent)}
                                         aria-label={`Select opponent ${opponent.name}`}
-                                    >
-                                        {opponent.avatarUrl ? (
+                                        >
+                                        <a target="_blank" href="https://google.com">list</a>
+                                        {opponent?.avatarUrl ? (
                                             <img src={opponent.avatarUrl} alt={`${opponent.name} avatar`} className="avatar" />
                                         ) : (
                                             <div aria-hidden className="blank-avatar" />
@@ -61,7 +62,7 @@ export default function Pairing({ player, opponents, selectOpponent, undoPair, c
                                             <div style={{ color: "#666" }}>
                                                 matchup: {player.matrix?.get(opponent.faction) ? player.matrix?.get(opponent.faction) : "unknown"}
                                             </div>
-                                        </div>
+                                        </div>                                       
                                     </button>
                                 </li>
                             ))}

@@ -2,6 +2,7 @@ type Player = {
     id: number;
     name: string;
     faction: string;
+    team: string;
     matrix?: Map<string, number>;
     pair?: Opponent;
     matchup?: number;

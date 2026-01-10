@@ -4,77 +4,17 @@ import React, { useEffect } from "react";
 import Pairing from "./pages/pairing/pairing";
 
 
-const opponentData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSMvlwz1PYX4_LmYlhHF7MirXyL8zmjKVx92avc2fPLTPoZuzyIOoz_0B6TJc6wSTC9a5_ev5y12YQ0/pub?output=csv'
+const opponentData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcdQNKgQOjIqnLimYvEurAKWn4c7GQOV12zIfChzWoB-YoRQZ6-iMZYWsptdmoUzbbEZ4dpvFH7t1s/pub?output=csv'
+const playerData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0fGIK5on2vqYIlv7EZf5DNAx1GtMHhG9QMc7QFp7jMgrojr-_N3INII8uBdVx-M19QveCWfN-NSeH/pub?output=csv'
 
 
-const playerMasterList: Player[] = [
-  {
-    id: 0,
-    name: "Jayde",
-    faction: "world eaters",
-    matrix: new Map<string, number>([
-      ["space marines", 0],
-      ["blood angels", 15],
-      ["imperial guard", 8],
-      ["death guard", 12],
-      ["chaos knights", 15]
-    ]),
-  },
-  {
-    id: 1,
-    name: "Doug",
-    faction: "black templars",
-    matrix: new Map<string, number>([
-      ["druhkari", 12],
-      ["blood angels", 15],
-      ["Imperial Guard", 12],
-      ["death guard", 8],
-      ["chaos knights", 10]
-    ]),
-  },
-  {
-    id: 2,
-    name: "Jarrett",
-    faction: "grey knights",
-    matrix: new Map<string, number>([
-      ["druhkari", 5],
-      ["blood angels", 10],
-      ["Imperial Guard", 15],
-      ["death guard", 5],
-      ["chaos knights", 9]
-    ]),
-  },
-  {
-    id: 3,
-    name: "Herm",
-    faction: "death guard",
-    matrix: new Map<string, number>([
-      ["druhkari", 12],
-      ["blood angels", 5],
-      ["Imperial Guard", 12],
-      ["death guard", 15],
-      ["chaos knights", 20]
-    ]),
-  },
-  {
-    id: 4,
-    name: "David",
-    faction: "imperial knights",
-    matrix: new Map<string, number>([
-      ["druhkari", 20],
-      ["blood angels", 5],
-      ["Imperial Guard", 12],
-      ["death guard", 12],
-      ["chaos knights", 10]
-    ]),
-  },
-];
 
-async function fetchOpponents(setOpponents: React.Dispatch<React.SetStateAction<Player[]>>) {
+
+const teams:Map<string, Player[]> = new Map<string, Player[]>;
+
+async function fetchOpponents(setOpponents: React.Dispatch<React.SetStateAction<Player[]>>, opposingTeam: string) {
   try {
-    const res = await fetch(
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vSMvlwz1PYX4_LmYlhHF7MirXyL8zmjKVx92avc2fPLTPoZuzyIOoz_0B6TJc6wSTC9a5_ev5y12YQ0/pub?output=csv"
-    );
+    const res = await fetch(opponentData);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const csv = await res.text();
 
@@ -88,13 +28,16 @@ async function fetchOpponents(setOpponents: React.Dispatch<React.SetStateAction<
     const [header, ...rows] = lines;
     const headers = header.split(",").map((h) => h.trim().toLowerCase());
 
+    const teamIdx = headers.indexOf("team")
     const nameIdx = headers.indexOf("player");
     const factionIdx = headers.indexOf("faction");
     const idIdx = headers.indexOf("id"); // optional
 
     const data: Opponent[] = rows.map((line, index) => {
       const cols = line.split(",").map((c) => c.trim());
+
       return {
+        team: cols[teamIdx] ?? "",
         name: cols[nameIdx] ?? "no name",
         faction: cols[factionIdx] ?? "",
         id:
@@ -104,18 +47,82 @@ async function fetchOpponents(setOpponents: React.Dispatch<React.SetStateAction<
       };
     });
 
-    setOpponents(data);
+    data.forEach((opponent) => {
+      if (teams.get(opponent.team) === undefined) {
+        teams.set(opponent.team, [opponent]);
+      } else {
+        teams.get(opponent.team)!.push(opponent);
+      }
+    })
+
+    const badGuys = teams.get(opposingTeam) === undefined ? teams.get(opposingTeam) : [];
+
+    setOpponents(badGuys!);
   } catch (err: any) {
     console.log(err.message ?? "Failed to load CSV");
+  }
+}
+async function fetchTeamMatrix(setPlayers: React.Dispatch<React.SetStateAction<Player[]>>) {
+  try {
+    const res = await fetch(playerData);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const csv = await res.text();
+
+    // Naive CSV parsing: split by lines, then commas.
+    const lines = csv
+      .trim()
+      .split(/\r?\n/)
+      .filter((l) => l.length > 0);
+
+    // Assume headers: Name,Faction,Id (or no Id; we’ll generate one)
+    const [header, ...rows] = lines;
+    const headers = header.split(",").map((h) => h.trim().toLowerCase());
+
+    const idIdx = headers.indexOf("id"); // optional
+    const nameIdx = headers.indexOf("player");
+    const factionIdx = headers.indexOf("faction");
+    const factions: Map<string, number> = new Map<string, number>()
+    headers.forEach((value, index)=>{
+      if (value != "player" && value != "faction" && value != "") {
+        factions.set(value, index)
+      }
+    });
+
+
+
+     const data: Player[] = rows.map((line, index) => {
+      const cols = line.split(",").map((c) => c.trim());
+      const matrix: Map<string, number> = new Map<string, number>()
+      factions.forEach((value, key)=>{
+        matrix.set(key, Number(cols[value]));
+      });
+      return {
+        name: cols[nameIdx] ?? "no name",
+        faction: cols[factionIdx] ?? "",
+        team:  "thundercluckers",
+        matrix: matrix,
+        id:
+          idIdx >= 0 && cols[idIdx] !== undefined
+            ? Number(cols[idIdx])
+            : index,
+      };
+    });
+
+    console.log(data)
+    setPlayers(data!);
+  } catch (err: any) {
+
   }
 }
 
 export default function Home() {
   const [opponents, setOpponents] = React.useState<Opponent[]>([]);
-  const [players, setPlayers] = React.useState<Player[]>(playerMasterList)
+  const [players, setPlayers] = React.useState<Player[]>([])
+  const [opposingTeam, setOpposingTeam] = React.useState<string>("")
 
   useEffect(() => {
-    fetchOpponents(setOpponents);
+    fetchOpponents(setOpponents, opposingTeam);
+    fetchTeamMatrix(setPlayers);
   }, []);
 
 
@@ -145,11 +152,22 @@ export default function Home() {
 
   return (
     <div>
+      <div>
+        Opponent: 
+        <select onChange={(e) => {
+          setOpposingTeam(e.target.value);
+          setOpponents(teams.get(e.target.value)!);
+          }}>
+            {
+              teams.keys().toArray().map((team)=> <option key={team} value={team}>{team}</option>)
+            }
+        </select>
+      </div>
       <div className="flex items-center justify-center bg-zinc-50 font-sans dark:bg-black">
         {
           players.map(player => {
             return (
-              <Pairing key={player.id} player={player} opponents={opponents} selectOpponent={selectOpponent} undoPair={undoPair} className="bg-zinc-50 font-sans dark:bg-black" />
+                <Pairing key={player.id} player={player} opponents={opponents} selectOpponent={selectOpponent} undoPair={undoPair} className="bg-zinc-50 font-sans dark:bg-black" />
             );
           })
         }
