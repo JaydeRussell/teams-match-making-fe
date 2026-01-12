@@ -3,6 +3,7 @@ type Player = {
     name: string;
     faction: string;
     team: string;
+    list?: string
     matrix?: Map<string, number>;
     pair?: Opponent;
     matchup?: number;

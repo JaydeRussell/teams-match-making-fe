@@ -4,6 +4,7 @@ import './pairing.css';
 
 
 
+
 type PairingProps = {
     player: Player;
     opponents: Opponent[];
@@ -15,9 +16,23 @@ type PairingProps = {
 type selectOpponent = (player: Player, opp: Opponent) => Player
 type undoPair = (player: Player) => Player
 
+
+const matrixColor = (rating: number | undefined) => {
+    if (rating === undefined) {
+        return "#ffd22efa"
+    }
+    
+    if (rating > 12) {
+        return "#00fd11"
+    } else if (rating > 8) {
+        return "#ffd22efa"
+    } else {
+        return "#ff0000"
+    }
+}
+
 export default function Pairing({ player, opponents, selectOpponent, undoPair, className }: PairingProps) {
     const showList = player.pair === undefined;
-    console.log(player)
 
     return (
         <div key={player.id} className={"pairing " + className}>
@@ -47,22 +62,21 @@ export default function Pairing({ player, opponents, selectOpponent, undoPair, c
                                     <button
                                         type="button"
                                         className="opponent"
-                                        onClick={() => selectOpponent(player, opponent)}
                                         aria-label={`Select opponent ${opponent.name}`}
                                         >
-                                        <a target="_blank" href="https://google.com">list</a>
                                         {opponent?.avatarUrl ? (
                                             <img src={opponent.avatarUrl} alt={`${opponent.name} avatar`} className="avatar" />
                                         ) : (
-                                            <div aria-hidden className="blank-avatar" />
+                                            <div aria-hidden className="blank-avatar" style={{ background: matrixColor(player.matrix?.get(opponent.faction))}} />
                                         )}
-                                        <div>
-                                            <div style={{ fontWeight: 600, color: "#666" }}>{opponent.faction}</div>
-                                            <div style={{ fontWeight: 250, color: "#666" }}>{opponent.name}</div>
+                                        <div onClick={() => selectOpponent(player, opponent)}>
+                                            <div style={{ fontWeight: 600, color: "#666"}}>{opponent.faction}</div>
+                                            <div style={{ fontWeight: 250, color: "#666", textOverflow: "ellipsis", maxWidth: 475, maxHeight: "2em"}}>{opponent.name}</div>
                                             <div style={{ color: "#666" }}>
                                                 matchup: {player.matrix?.get(opponent.faction) ? player.matrix?.get(opponent.faction) : "unknown"}
                                             </div>
-                                        </div>                                       
+                                        </div>      
+                                        <a style={{ color: "#666"}} target="_blank" href={opponent.list}>list</a>
                                     </button>
                                 </li>
                             ))}

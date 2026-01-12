@@ -31,6 +31,7 @@ async function fetchOpponents(setOpponents: React.Dispatch<React.SetStateAction<
     const teamIdx = headers.indexOf("team")
     const nameIdx = headers.indexOf("player");
     const factionIdx = headers.indexOf("faction");
+    const listIdx = headers.indexOf("list");
     const idIdx = headers.indexOf("id"); // optional
 
     const data: Opponent[] = rows.map((line, index) => {
@@ -40,6 +41,7 @@ async function fetchOpponents(setOpponents: React.Dispatch<React.SetStateAction<
         team: cols[teamIdx] ?? "",
         name: cols[nameIdx] ?? "no name",
         faction: cols[factionIdx] ?? "",
+        list: cols[listIdx] ?? "https://google.com",
         id:
           idIdx >= 0 && cols[idIdx] !== undefined
             ? Number(cols[idIdx])
